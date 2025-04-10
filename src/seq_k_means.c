@@ -3,9 +3,9 @@
 #include <math.h>
 #include <time.h>
 
-#define NUM_POINTS 10000000 // Número total de pontos
-#define K 25                // Número de clusters (centróides)
-#define MAX_ITER 250        // Número máximo de iterações permitidas
+#define NUM_POINTS 1000000 // Número total de pontos
+#define K 25               // Número de clusters (centróides)
+#define MAX_ITER 100       // Número máximo de iterações permitidas
 
 // Estrutura que representa um ponto 2D e o cluster ao qual pertence.
 typedef struct {
@@ -57,8 +57,8 @@ int main() {
     int iterations = 0;
     int changed = 1;  // Flag que indica se houve alteração nas atribuições dos pontos
     
-    // Abre o arquivo de log (modo append)
-    FILE *logFile = fopen("execution.log", "a");
+    // Abre o arquivo de log
+    FILE *logFile = fopen("./logs/seq-execution.log", "a");
     if (logFile == NULL) {
         printf("Erro ao abrir o arquivo de log.\n");
         free(points);
@@ -67,7 +67,7 @@ int main() {
     
     // Loga um cabeçalho com o timestamp da execução
     time_t now = time(NULL);
-    char *timestamp = ctime(&now); // ctime já adiciona uma quebra de linha
+    char *timestamp = ctime(&now);
     fprintf(logFile, "===========================\n");
     fprintf(logFile, "Início da execução: %s", timestamp);
     
@@ -81,7 +81,7 @@ int main() {
         
         changed = 0;
         
-        // PASSO 1: Atribuição dos pontos para o centróide mais próximo
+        // Atribuição dos pontos para o centróide mais próximo
         for (int i = 0; i < NUM_POINTS; i++) {
             double minDist = distance(points[i], centroids[0]);
             int bestCluster = 0;
@@ -98,7 +98,7 @@ int main() {
             }
         }
         
-        // PASSO 2: Atualização dos centróides (média dos pontos de cada cluster)
+        // Atualização dos centróides
         double sumX[K] = {0};
         double sumY[K] = {0};
         int count[K] = {0};  // Contador de pontos para cada cluster nesta iteração
@@ -128,7 +128,7 @@ int main() {
                     j, centroids[j].x, centroids[j].y, count[j]);
         }
         fprintf(logFile, "-----------------------------------\n");
-        fflush(logFile);  // Garante que o log seja escrito no arquivo a cada iteração
+        fflush(logFile);
         
         iterations++;
     }
@@ -164,14 +164,7 @@ int main() {
     fprintf(logFile, "\n");
     
     fclose(logFile);
-    
-    // Exemplo: exibe as atribuições dos 10 primeiros pontos
-    printf("\nExemplo de atribuição dos 10 primeiros pontos:\n");
-    for (int i = 0; i < 10; i++) {
-        printf("Ponto %d: (%.2f, %.2f) -> Cluster %d\n", 
-               i, points[i].x, points[i].y, points[i].cluster);
-    }
-    
+        
     free(points);
     return 0;
 }

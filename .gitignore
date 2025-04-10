@@ -1,0 +1,11 @@
+# Ignorar arquivos .log
+logs/
+*.log
+
+# Ignorar objetos de compilação
+*.o
+*.out
+*.exe
+
+# Ignorar os binários
+exe/
