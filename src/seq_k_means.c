@@ -28,13 +28,14 @@ double distance(Point p, Centroid c) {
     return sqrt(dx * dx + dy * dy);
 }
 
-int main() {
+int main(int argc, char **argv) {
     // Aloca o vetor de pontos
     Point *points = malloc(NUM_POINTS * sizeof(Point));
     if (points == NULL) {
         printf("Erro ao alocar memória para os pontos.\n");
         return 1;
     }
+
     
     Centroid centroids[K];
 
@@ -42,7 +43,10 @@ int main() {
     srand(time(NULL));
     double itime, ftime, exec_time;
 
-    omp_set_num_threads(4);
+    // Utiliza o valor passado por linha de comando para setar o número de threads
+    int num_threads = atoi(argv[1]);
+    // Configura o número de threads para OpenMP
+    omp_set_num_threads(num_threads);
 
     // Geração aleatória dos pontos (intervalo [0, 100] para x e y)
     for (int i = 0; i < NUM_POINTS; i++) {
