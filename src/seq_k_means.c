@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <omp.h>
 
 #define NUM_POINTS 1000000 // Número total de pontos
 #define K 25               // Número de clusters (centróides)
@@ -39,6 +40,9 @@ int main() {
 
     // Inicializa a semente para números aleatórios
     srand(time(NULL));
+    double itime, ftime, exec_time;
+
+    omp_set_num_threads(4);
 
     // Geração aleatória dos pontos (intervalo [0, 100] para x e y)
     for (int i = 0; i < NUM_POINTS; i++) {
@@ -58,7 +62,7 @@ int main() {
     int changed = 1;  // Flag que indica se houve alteração nas atribuições dos pontos
     
     // Abre o arquivo de log
-    FILE *logFile = fopen("./logs/seq-execution.log", "a");
+    FILE *logFile = fopen("../logs/seq-execution.log", "a");
     if (logFile == NULL) {
         printf("Erro ao abrir o arquivo de log.\n");
         free(points);
@@ -72,8 +76,7 @@ int main() {
     fprintf(logFile, "Início da execução: %s", timestamp);
     
     // Medição do tempo total de execução
-    clock_t overall_start = clock();
-    
+    itime = omp_get_wtime();
     // Loop principal do algoritmo k-means
     while (changed && iterations < MAX_ITER) {
         // Registra o início da iteração
@@ -82,6 +85,7 @@ int main() {
         changed = 0;
         
         // Atribuição dos pontos para o centróide mais próximo
+        #pragma omp parallel for
         for (int i = 0; i < NUM_POINTS; i++) {
             double minDist = distance(points[i], centroids[0]);
             int bestCluster = 0;
@@ -94,7 +98,8 @@ int main() {
             }
             if (points[i].cluster != bestCluster) {
                 points[i].cluster = bestCluster;
-                changed = 1;
+                #pragma omp atomic write
+                    changed = 1;
             }
         }
         
@@ -102,12 +107,14 @@ int main() {
         double sumX[K] = {0};
         double sumY[K] = {0};
         int count[K] = {0};  // Contador de pontos para cada cluster nesta iteração
+        #pragma omp parallel for
         for (int i = 0; i < NUM_POINTS; i++) {
             int cl = points[i].cluster;
             sumX[cl] += points[i].x;
             sumY[cl] += points[i].y;
             count[cl]++;
         }
+
         for (int j = 0; j < K; j++) {
             if (count[j] != 0) {
                 centroids[j].x = sumX[j] / count[j];
@@ -116,26 +123,13 @@ int main() {
         }
         
         // Registra o fim da iteração e o tempo de duração
-        clock_t iter_end = clock();
-        double iter_duration = (double)(iter_end - iter_start) / CLOCKS_PER_SEC;
-        
-        // Loga os detalhes da iteração
-        fprintf(logFile, "Iteração %d:\n", iterations + 1);
-        fprintf(logFile, "   Início: %.4f s, Término: %.4f s, Duração: %.4f s\n",
-                (double)iter_start / CLOCKS_PER_SEC, (double)iter_end / CLOCKS_PER_SEC, iter_duration);
-        for (int j = 0; j < K; j++) {
-            fprintf(logFile, "   Cluster %d: Centróide (%.4f, %.4f), Pontos: %d\n",
-                    j, centroids[j].x, centroids[j].y, count[j]);
-        }
-        fprintf(logFile, "-----------------------------------\n");
-        fflush(logFile);
-        
         iterations++;
     }
     
     // Registra o fim do tempo total de execução
-    clock_t overall_end = clock();
-    double total_duration = (double)(overall_end - overall_start) / CLOCKS_PER_SEC;
+    ftime = omp_get_wtime();
+    exec_time = ftime - itime;
+
     
     // Exibe os resultados finais no console
     printf("K-means convergiu em %d iterações.\n", iterations);
@@ -147,12 +141,11 @@ int main() {
         }
         printf("Centróide %d: (%.4f, %.4f) com %d pontos.\n", j, centroids[j].x, centroids[j].y, final_count);
     }
-    printf("Tempo total de execução: %.4f segundos\n", total_duration);
+    printf("Tempo total de execução: %.4f segundos\n", exec_time);
     
     // Loga o resumo final da execução
     fprintf(logFile, "Resumo final:\n");
     fprintf(logFile, "K-means convergiu em %d iterações.\n", iterations);
-    fprintf(logFile, "Tempo total de execução: %.4f segundos\n", total_duration);
     for (int j = 0; j < K; j++) {
         int final_count = 0;
         for (int i = 0; i < NUM_POINTS; i++) {
