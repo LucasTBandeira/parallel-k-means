@@ -4,9 +4,9 @@
 #include <time.h>
 #include <omp.h>
 
-#define NUM_POINTS 1000000 // Número total de pontos
-#define K 25               // Número de clusters (centróides)
-#define MAX_ITER 100       // Número máximo de iterações permitidas
+#define NUM_POINTS 10000000 // Número total de pontos
+#define K 50                // Número de clusters (centróides)
+#define MAX_ITER 100        // Número máximo de iterações permitidas
 
 // Estrutura que representa um ponto 2D e o cluster ao qual pertence
 typedef struct {
@@ -38,21 +38,22 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Inicializa semente reentrante para rand_r
+    // Inicializa semente para geração de números aleatórios
     unsigned int seed = (unsigned int)time(NULL);
-
+    srand(seed);
+    
     Centroid centroids[K];
 
     // Geração aleatória dos pontos no intervalo [0, 100] para x e y
     for (int i = 0; i < NUM_POINTS; i++) {
-        points[i].x = rand_r(&seed) / (double)RAND_MAX * 100.0;
-        points[i].y = rand_r(&seed) / (double)RAND_MAX * 100.0;
+        points[i].x = rand() / (double)RAND_MAX * 100.0;
+        points[i].y = rand() / (double)RAND_MAX * 100.0;
         points[i].cluster = -1;
     }
     
     // Inicializa os centróides escolhendo aleatoriamente pontos gerados
     for (int i = 0; i < K; i++) {
-        int index = rand_r(&seed) % NUM_POINTS;
+        int index = rand() % NUM_POINTS;
         centroids[i].x = points[index].x;
         centroids[i].y = points[index].y;
     }

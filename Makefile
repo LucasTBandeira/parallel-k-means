@@ -1,29 +1,34 @@
-# Compilador e flags
-CC      = gcc
-CFLAGS  = -Wall -Wextra -O2 -std=c99 -fopenmp
-LDFLAGS = -lm
+CC       := gcc
+CFLAGS   := -Wall -Wextra -O2 -std=c99 -fopenmp  # <— agora o -fopenmp sempre
+LDFLAGS  := -lm
 
-THREADS ?= 1
+VERSION  ?= seq
+THREADS  ?= 1
 
-# Nome do arquivo fonte e do executável
-SRC     = src/seq_k_means.c
-TARGET  = exe/seq_k_means
+ifeq ($(VERSION),par)
+    SRC     := src/par_k_means.c
+    TARGET  := exe/kmeans_par
+else ifeq ($(VERSION),seq)
+    SRC     := src/seq_k_means.c
+    TARGET  := exe/kmeans_seq
+endif
 
-# Alvos padrões
 .PHONY: all run clean
 
-# Alvo padrão: compilar o executável
 all: $(TARGET)
 
-# Regras de compilação
 $(TARGET): $(SRC)
-	@mkdir -p exe
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(LDFLAGS)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
-# Alvo para executar o programa
-run: $(TARGET)
-	./$(TARGET) $(THREADS)
+run: all
+ifeq ($(VERSION),seq)
+	@echo "---> Executando versão SEQUENCIAL com $(THREADS) threads"
+	@./$(TARGET) $(THREADS)
+else
+	@echo "---> Executando versão PARALELA com $(THREADS) threads"
+	@./$(TARGET) $(THREADS)
+endif
 
-# Alvo para limpar os arquivos gerados
 clean:
-	rm -f $(TARGET)
+	rm -rf exe/kmeans_*
