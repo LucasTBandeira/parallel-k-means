@@ -1,7 +1,9 @@
 # Compilador e flags
 CC      = gcc
-CFLAGS  = -Wall -Wextra -O2 -std=c99
+CFLAGS  = -Wall -Wextra -O2 -std=c99 -fopenmp
 LDFLAGS = -lm
+
+THREADS ?= 1
 
 # Nome do arquivo fonte e do executável
 SRC     = src/seq_k_means.c
@@ -20,7 +22,7 @@ $(TARGET): $(SRC)
 
 # Alvo para executar o programa
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) $(THREADS)
 
 # Alvo para limpar os arquivos gerados
 clean:
