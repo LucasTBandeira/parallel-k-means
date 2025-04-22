@@ -4,6 +4,7 @@ LDFLAGS  := -lm
 
 VERSION  ?= seq
 THREADS  ?= 1
+MODE     ?= 0
 
 ifeq ($(VERSION),par)
     SRC     := src/par_k_means_v3.c # Trocar a versão conforme o teste a ser realizado (v3 padrão - a melhor)
@@ -24,10 +25,10 @@ $(TARGET): $(SRC)
 run: all
 ifeq ($(VERSION),seq)
 	@echo "---> Executando versão SEQUENCIAL com $(THREADS) threads"
-	@./$(TARGET) $(THREADS)
+	@./$(TARGET) $(THREADS) $(MODE)
 else
 	@echo "---> Executando versão PARALELA com $(THREADS) threads"
-	@./$(TARGET) $(THREADS)
+	@./$(TARGET) $(THREADS) $(MODE)
 endif
 
 clean:
