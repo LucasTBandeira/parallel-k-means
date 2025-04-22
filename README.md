@@ -1,4 +1,4 @@
-# parallel-k-means
+# K-Means
 
 ## Rodar Código Sequencial
 - make VERSION=seq
