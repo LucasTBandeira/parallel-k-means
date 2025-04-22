@@ -6,7 +6,7 @@ VERSION  ?= seq
 THREADS  ?= 1
 
 ifeq ($(VERSION),par)
-    SRC     := src/par_k_means.c
+    SRC     := src/par_k_means_v3.c # Trocar a versão conforme o teste a ser realizado (v3 padrão - a melhor)
     TARGET  := exe/kmeans_par
 else ifeq ($(VERSION),seq)
     SRC     := src/seq_k_means.c
